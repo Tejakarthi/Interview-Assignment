@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using RL.Data;
 using RL.Data.DataModels;
-using System.Data.Entity;
 
 namespace RL.Backend.Controllers;
 
@@ -23,37 +22,23 @@ public class PlanProcedureController : ControllerBase
     [EnableQuery]
     public IEnumerable<PlanProcedure> Get()
     {
-        List<PlanProcedure> plans = new List<PlanProcedure>();  // Initialize plans as an empty list
-                                                                // Fetch all plan procedures
-        List<PlanProcedure> data = _context.PlanProcedures.ToList();
-
-        foreach (PlanProcedure procedure in data)
-        {
-            var id = procedure.PlanId;
-            var ProcedureId = procedure.ProcedureId;
-
-            // Fetch user procedures related to the plan
-            List<UserProcedure> users = _context.UserProcedures.Where(a => a.PlanId == id && a.ProcedureId == ProcedureId).ToList();
-            Procedure procedures = _context.Procedures.Where(a => a.ProcedureId == ProcedureId).Single();
-
-            if (procedure.Procedure == null)
+        var planProcedures = _context.PlanProcedures
+            .Select(planProcedure => new PlanProcedure
             {
-                procedure.Procedure = new Procedure();
-            }
-            procedure.Procedure = procedures;
-            // Ensure the UserProcedures list is initialized
-            if (procedure.UserProcedures == null)
-            {
-                procedure.UserProcedures = new List<UserProcedure>();
-            }
+                ProcedureId = planProcedure.ProcedureId,
+                PlanId = planProcedure.PlanId,
+                UserId = planProcedure.UserId,
+                Procedure = _context.Procedures.FirstOrDefault(p => p.ProcedureId == planProcedure.ProcedureId),
+                UserProcedures = _context.UserProcedures
+                    .Where(up => up.PlanId == planProcedure.PlanId && up.ProcedureId == planProcedure.ProcedureId)
+                    .ToList(),
+                CreateDate = planProcedure.CreateDate,
+                UpdateDate = planProcedure.UpdateDate
+            })
+            .ToList(); 
 
-            procedure.UserProcedures.AddRange(users);
-
-            // Add the updated procedure to the plans list
-            plans.Add(procedure);  // Use Add() here
-        }
-
-        return plans;  // Return the updated list
+        return planProcedures;
     }
+
 
 }

@@ -8,7 +8,7 @@ const ProcedureItem = ({ procedure, handleAddProcedureToPlan, planProcedures }) 
                     className="form-check-input"
                     type="checkbox"
                     value=""
-                    id="procedureCheckbox"
+                    id={`procedureCheckbox-${procedure.procedureId}`}
                     checked={
                         planProcedures.find(
                             (p) => p.procedureId === procedure.procedureId
@@ -18,7 +18,7 @@ const ProcedureItem = ({ procedure, handleAddProcedureToPlan, planProcedures }) 
                     }
                     onChange={() => handleAddProcedureToPlan(procedure)}
                 ></input>
-                <label className="form-check-label" htmlFor="procedureCheckbox">
+                <label className="form-check-label" htmlFor={`procedureCheckbox-${procedure.procedureId}`}>
                     {procedure.procedureTitle}
                 </label>
             </div>

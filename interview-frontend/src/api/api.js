@@ -1,11 +1,11 @@
-const api_url = "https://localhost:44343";
+const api_url = "https://localhost:10011";
 
 export const startPlan = async (planId = 1) => {
     const url = `${api_url}/Plan`;
 
     const requestBody = {
         planId,
-        createDate: new Date().toISOString(), 
+        createDate: new Date().toISOString(),
         updateDate: new Date().toISOString(),
         planProcedures: []
     };
@@ -32,9 +32,7 @@ export const startPlan = async (planId = 1) => {
     }
 };
 
-
 export const addProcedureToPlan = async (plans) => {
-    
     const url = `${api_url}/Plan/AddProcedureToPlan`;
     const response = await fetch(url, {
         method: "POST",
@@ -51,7 +49,6 @@ export const addProcedureToPlan = async (plans) => {
 };
 
 export const assignUserToProcedure = async (plans) => {
-    
     const url = `${api_url}/UserProcedure/AddUserProcedureToPlan`;
     const response = await fetch(url, {
         method: "POST",
@@ -68,7 +65,6 @@ export const assignUserToProcedure = async (plans) => {
 
     return true;
 };
-
 
 export const getProcedures = async () => {
     const url = `${api_url}/Procedures`;
@@ -94,8 +90,6 @@ export const getPlanProcedures = async (planId) => {
 
     return data;  // Return the data
 };
-
-
 
 export const getUsers = async () => {
     const url = `${api_url}/Users`;

@@ -10,17 +10,22 @@ namespace RL.Backend.Commands.Handlers.Plans;
 public class AddProcedureToPlanCommandHandler : IRequestHandler<AddProcedureToPlanCommand, ApiResponse<Unit>>
 {
     private readonly RLContext _context;
+    private readonly ILogger<AddProcedureToPlanCommandHandler> _logger;
 
-    public AddProcedureToPlanCommandHandler(RLContext context)
+
+    public AddProcedureToPlanCommandHandler(RLContext context, ILogger<AddProcedureToPlanCommandHandler> logger)
     {
         _context = context;
+        _logger = logger;
+
     }
 
     public async Task<ApiResponse<Unit>> Handle(AddProcedureToPlanCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            
+            _logger.LogInformation("request:" + request.PlanId.ToString());
+
             //Validate request
             if (request.PlanId < 1)
                 return ApiResponse<Unit>.Fail(new BadRequestException("Invalid PlanId"));
@@ -31,6 +36,8 @@ public class AddProcedureToPlanCommandHandler : IRequestHandler<AddProcedureToPl
                 .Include(p => p.PlanProcedures)
                 .FirstOrDefaultAsync(p => p.PlanId == request.PlanId);
             var procedure = await _context.Procedures.FirstOrDefaultAsync(p => p.ProcedureId == request.ProcedureId);
+            _logger.LogInformation("plan:" + plan.PlanId.ToString());
+            _logger.LogInformation("procedure:" + procedure.ProcedureId);
 
             if (plan is null)
                 return ApiResponse<Unit>.Fail(new NotFoundException($"PlanId: {request.PlanId} not found"));
@@ -54,6 +61,8 @@ public class AddProcedureToPlanCommandHandler : IRequestHandler<AddProcedureToPl
         }
         catch (Exception e)
         {
+            _logger.LogError("Exception:" + e.StackTrace);
+
             return ApiResponse<Unit>.Fail(e);
         }
     }

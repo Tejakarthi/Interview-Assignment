@@ -11,16 +11,21 @@ namespace RL.Backend.Commands.Handlers.Plans;
 public class AddUserToProcedureCommandHandler : IRequestHandler<AddProcedureToUserCommand, ApiResponse<Unit>>
 {
     private readonly RLContext _context;
+    private readonly ILogger<AddUserToProcedureCommandHandler> _logger;
 
-    public AddUserToProcedureCommandHandler(RLContext context)
+
+    public AddUserToProcedureCommandHandler(RLContext context, ILogger<AddUserToProcedureCommandHandler> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<ApiResponse<Unit>> Handle(AddProcedureToUserCommand request, CancellationToken cancellationToken)
     {
         try
         {
+            _logger.LogInformation("request:");
+
             if (request.UserId < 1)
                 return ApiResponse<Unit>.Fail(new BadRequestException("Invalid UserId"));
             if (request.ProcedureId < 1)
@@ -32,6 +37,9 @@ public class AddUserToProcedureCommandHandler : IRequestHandler<AddProcedureToUs
                 .Include(p => p.PlanProcedures)
                 .FirstOrDefaultAsync(p => p.PlanId == request.PlanId);
             var procedure = await _context.Procedures.FirstOrDefaultAsync(p => p.ProcedureId == request.ProcedureId);
+
+            _logger.LogInformation("plan:" + plan.PlanId.ToString());
+            _logger.LogInformation("procedure:" +procedure.ProcedureId.ToString());
 
             if (plan is null)
                 return ApiResponse<Unit>.Fail(new NotFoundException($"PlanId: {request.PlanId} not found"));
@@ -57,6 +65,7 @@ public class AddUserToProcedureCommandHandler : IRequestHandler<AddProcedureToUs
             // Check if the entry already exists
             bool exists = await _context.UserProcedures
                 .AnyAsync(up => up.UserId == request.UserId && up.ProcedureId == request.ProcedureId && up.PlanId == request.PlanId, cancellationToken);
+            _logger.LogInformation("UserProcedures:" + exists);
 
             if (exists)
             {
@@ -84,6 +93,8 @@ public class AddUserToProcedureCommandHandler : IRequestHandler<AddProcedureToUs
         }
         catch (Exception ex)
         {
+            _logger.LogError("Exception:" + ex.StackTrace);
+
             return ApiResponse<Unit>.Fail(ex);
         }
     }

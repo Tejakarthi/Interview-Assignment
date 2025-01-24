@@ -10,32 +10,32 @@ import {
 import Layout from "../Layout/Layout";
 import ProcedureItem from "./ProcedureItem/ProcedureItem";
 import PlanProcedureItem from "./PlanProcedureItem/PlanProcedureItem";
+import { ThreeDots } from "react-loader-spinner";
 
 const Plan = () => {
-  let { id } = useParams();
+  const { id } = useParams();
   const [procedures, setProcedures] = useState([]);
   const [planProcedures, setPlanProcedures] = useState([]);
   const [users, setUsers] = useState([]);
-  const [assignedUsers, setAssignedUsers] = useState({}); // Track assigned users per procedure
+  const [assignedUsers, setAssignedUsers] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
       try {
         const procedures = await getProcedures();
         const planProcedures = await getPlanProcedures(id);
         const users = await getUsers();
 
-        // Convert users to dropdown format: { label: "John Doe", value: 1 }
         const userOptions = users.map((u) => ({ label: u.name, value: u.userId }));
 
-        // Initialize assigned users based on userProcedures for each procedure
         const initialAssignedUsers = planProcedures.reduce((acc, planProcedure) => {
           const assignedUsersForProcedure = planProcedure?.userProcedures
             ?.map((userProcedure) => {
               const user = userOptions.find((u) => u.value === userProcedure.userId);
               return user;
             })
-            .filter(Boolean); // Remove null values
+            .filter(Boolean);
           acc[planProcedure.procedureId] = assignedUsersForProcedure;
           return acc;
         }, {});
@@ -46,8 +46,12 @@ const Plan = () => {
         setAssignedUsers(initialAssignedUsers);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
-    })();
+    };
+
+    fetchData();
   }, [id]);
 
   const handleAddProcedureToPlan = async (procedure, selectedUsers) => {
@@ -98,7 +102,6 @@ const Plan = () => {
   const handleUserAssign = async (procedureId, selectedUsers) => {
     const previousAssignedUsers = assignedUsers[procedureId] || [];
 
-    // Find users to add/remove
     const newUsers = selectedUsers.filter(
       (user) => !previousAssignedUsers.some((prevUser) => prevUser.value === user.value)
     );
@@ -109,7 +112,6 @@ const Plan = () => {
     const ClearAll = selectedUsers.length === 0 ? 1 : 0;
 
     try {
-      // Add new users
       for (const user of newUsers) {
         await assignUserToProcedure({
           planId: id,
@@ -120,7 +122,6 @@ const Plan = () => {
         });
       }
 
-      // Remove unselected users
       for (const user of usersToRemove) {
         await assignUserToProcedure({
           planId: id,
@@ -131,7 +132,6 @@ const Plan = () => {
         });
       }
 
-      // Update state
       setAssignedUsers((prevState) => ({
         ...prevState,
         [procedureId]: selectedUsers,
@@ -140,6 +140,23 @@ const Plan = () => {
       console.error("Error updating user assignments:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="container pt-4 text-center">
+          <ThreeDots
+            height="80"
+            width="80"
+            radius="9"
+            color="#00BFFF"
+            ariaLabel="three-dots-loading"
+            visible={true}
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
