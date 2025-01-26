@@ -6,5 +6,5 @@ namespace RL.Backend.Commands;
 
 public class CreatePlanCommand : IRequest<ApiResponse<Plan>>
 {
-
+    public int PlanId { get; set; }
 }

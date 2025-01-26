@@ -2,6 +2,8 @@ using MediatR;
 using RL.Backend.Models;
 using RL.Data;
 using RL.Data.DataModels;
+using System.Data.Entity;
+using System.Numerics;
 
 namespace RL.Backend.Commands.Handlers.Plans;
 
@@ -14,14 +16,25 @@ public class CreatePlanCommandHandler : IRequestHandler<CreatePlanCommand, ApiRe
         _context = context;
     }
 
+
     public async Task<ApiResponse<Plan>> Handle(CreatePlanCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var plan = new Plan();
-            _context.Plans.Add(plan);
 
-            await _context.SaveChangesAsync();
+            var plans = _context.Plans.ToList();
+            var plan = plans.FirstOrDefault(p => p.PlanId == request.PlanId);
+
+            if (plan == null)
+            {
+                plan = new Plan
+                {
+                    PlanId = request.PlanId
+                };
+
+                _context.Plans.Add(plan);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
 
             return ApiResponse<Plan>.Succeed(plan);
         }
@@ -30,4 +43,6 @@ public class CreatePlanCommandHandler : IRequestHandler<CreatePlanCommand, ApiRe
             return ApiResponse<Plan>.Fail(e);
         }
     }
+
+
 }

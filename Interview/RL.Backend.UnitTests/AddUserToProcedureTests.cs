@@ -1,6 +1,7 @@
 using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using RL.Backend.Commands;
 using RL.Backend.Commands.Handlers.Plans;
@@ -49,7 +50,8 @@ public class AddUserToProcedureTests
         
         //Given
         var context = new Mock<RLContext>();
-        var sut = new AddUserToProcedureCommandHandler(context.Object);
+        var mockLogger = new Mock<ILogger<AddUserToProcedureCommandHandler>>();
+        var sut = new AddUserToProcedureCommandHandler(context.Object, (ILogger<AddUserToProcedureCommandHandler>)mockLogger);
         var request = new AddProcedureToUserCommand
         {
             UserId = 0,
@@ -69,8 +71,8 @@ public class AddUserToProcedureTests
     {
         //Given
         var context = new Mock<RLContext>();
-        var sut = new AddUserToProcedureCommandHandler(context.Object);
-        var request = new AddProcedureToUserCommand
+        var mockLogger = new Mock<ILogger<AddUserToProcedureCommandHandler>>();
+        var sut = new AddUserToProcedureCommandHandler(context.Object, (ILogger<AddUserToProcedureCommandHandler>)mockLogger); var request = new AddProcedureToUserCommand
         {
             UserId = 1,
             ProcedureId = 0,
@@ -89,8 +91,8 @@ public class AddUserToProcedureTests
     {
         //Given
         var context = new Mock<RLContext>();
-        var sut = new AddUserToProcedureCommandHandler(context.Object);
-        var request = new AddProcedureToUserCommand
+        var mockLogger = new Mock<ILogger<AddUserToProcedureCommandHandler>>();
+        var sut = new AddUserToProcedureCommandHandler(context.Object, (ILogger<AddUserToProcedureCommandHandler>)mockLogger); var request = new AddProcedureToUserCommand
         {
             UserId = 1,
             ProcedureId = 1,
@@ -108,8 +110,8 @@ public class AddUserToProcedureTests
     {
         // Given
         var context = DbContextHelper.CreateContext();
-        var sut = new AddUserToProcedureCommandHandler(context);
-
+        var mockLogger = new Mock<ILogger<AddUserToProcedureCommandHandler>>();
+        var sut = new AddUserToProcedureCommandHandler(context, (ILogger<AddUserToProcedureCommandHandler>)mockLogger);
         var request = new AddProcedureToUserCommand
         {
             PlanId = 1,

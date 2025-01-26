@@ -1,6 +1,6 @@
 const api_url = "https://localhost:10011";
 
-export const startPlan = async (planId = 1) => {
+export const startPlan = async (planId) => {
     const url = `${api_url}/Plan`;
 
     const requestBody = {

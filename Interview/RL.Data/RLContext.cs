@@ -26,12 +26,13 @@ public class RLContext : DbContext
             typeBuilder.HasOne(pp => pp.Procedure).WithMany();
         });
 
-        builder.Entity<UserProcedure>(typeBuilder =>
+        builder.Entity<UserProcedure>(entity =>
         {
-            typeBuilder.HasKey(x => new { x.UserId, x.ProcedureId }); 
-        });
+            entity.HasKey(e => new { e.UserId, e.ProcedureId });
 
-        // Add procedure Seed Data
+         });
+
+
         var seedData = File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "ProcedureSeedData.csv"));
         builder.Entity<Procedure>(p =>
         {
